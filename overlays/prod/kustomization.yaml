@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: prod
+namePrefix: prod-
+
+commonLabels:
+  environment: prod
+
+resources:
+  - ../../base
+
+replicas:
+  - name: webapp
+    count: 3
+
+patches:
+  - patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: ENVIRONMENT
+            value: "production"
+
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "100m"
+
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "128Mi"
+
+    target:
+      kind: Deployment
+      name: webapp
